@@ -25,7 +25,7 @@ namespace Lection11_Tests.Tests.UITests
         {
             Page = await Fixture.Browser.NewPageAsync(new BrowserNewPageOptions
             {
-                ViewportSize = null
+                ViewportSize = ViewportSize.NoViewport
             });
         }
 
@@ -40,5 +40,15 @@ namespace Lection11_Tests.Tests.UITests
         {
             await Fixture.DisposeAsync();
         }
+
+        /*protected ILocatorAssertions Expect(ILocator locator)
+        {
+            return Assertions.Expect(locator);
+        }
+
+        protected IPageAssertions Expect(IPage page)
+        {
+            return Assertions.Expect(page);
+        }*/
     }
 }
