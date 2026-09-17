@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Lection11_Tests.ForUI.Pages.Heroku;
 using Microsoft.Playwright;
 using NUnit.Framework;
 
@@ -14,17 +15,10 @@ namespace Lection11_Tests.Tests.UITests
         [Test]
         public async Task FormAuthentication()
         {
-            await Page.GotoAsync("https://the-internet.herokuapp.com/login");
-            var userNameTextBox = Page.GetByRole(AriaRole.Textbox, new() { Name = "Username" });
-            await userNameTextBox.FillAsync("wrong");
-            var passTextBox = Page.GetByRole(AriaRole.Textbox, new() { Name = "Password" });
-            //var passTextBox = await Page.QuerySelectorAsync("#password");
-            //var passTextBox = Page.Locator("#password");
-            await passTextBox.FillAsync("wrong");
-            var loginButton = Page.GetByRole(AriaRole.Button, new() { Name = "Login" });
-            await loginButton.ClickAsync();
-            var errorMessageLabel = Page.Locator("//div[@id='flash']");
-            var errorMessage = await errorMessageLabel.TextContentAsync();
+            LoginPage loginPage = new LoginPage(Page);
+            await loginPage.OpenLoginPageAsync();
+            await loginPage.FillLoginFormAsync("wrong", "wrong");
+            string errorMessage = await loginPage.GetTextFromErrorLabelAsync();
             errorMessage.Should().Contain("Your username is invalid!");
         }
 
@@ -58,85 +52,73 @@ namespace Lection11_Tests.Tests.UITests
             await Page.GotoAsync("https://demoqa.com/select-menu");
             var dropdown = Page.Locator("#withOptGroup");
             await dropdown.ClickAsync();
+
             var option = Page.GetByText("Group 1, option 1");
             await option.ClickAsync();
-            var text = dropdown.TextContentAsync();
+
+            var text = await dropdown.TextContentAsync();
             await Assertions.Expect(dropdown).ToContainTextAsync("Group 1, option 1");
         }
 
         [Test]
-        public async Task CheckBoxes()
+        public async Task CheckBoxes_ID123()
         {
+            CheckBoxesPage checkBoxesPage = new CheckBoxesPage(Page);
             // Открываем страницу
-            await Page.GotoAsync("https://the-internet.herokuapp.com/checkboxes");
-            await Assertions.Expect(Page).ToHaveTitleAsync("The Internet");
-            await Assertions.Expect(Page).ToHaveURLAsync("https://the-internet.herokuapp.com/checkboxes");
-
-            // Локаторы чекбоксов
-            var first = Page.Locator("input[type='checkbox']").Nth(0);
-            var second = Page.Locator("input[type='checkbox']").Nth(1);
+            await checkBoxesPage.OpenCheckboxesPageAsync();
+            await checkBoxesPage.CheckPageOpenAsync();
 
             // --- Проверка дефолтного состояния ---
-            await Assertions.Expect(first).Not.ToBeCheckedAsync();
-            await Assertions.Expect(second).ToBeCheckedAsync();
+            bool stateOfCheckbox1 = await checkBoxesPage.GetStateOfCheckboxAsync(1);
+            bool stateOfCheckbox2 = await checkBoxesPage.GetStateOfCheckboxAsync(2);
+            stateOfCheckbox1.Should().BeFalse();
+            stateOfCheckbox2.Should().BeTrue();
 
             // --- ДЕЙСТВИЕ 1: отщёлкнуть второй чекбокс ---
-            await second.UncheckAsync();
+            await checkBoxesPage.UncheckCheckboxAsync(2);
 
             // Проверка после действия
-            await Assertions.Expect(second).Not.ToBeCheckedAsync();
+            stateOfCheckbox2 = await checkBoxesPage.GetStateOfCheckboxAsync(2);
+            stateOfCheckbox2.Should().BeFalse();
 
             // --- ДЕЙСТВИЕ 2: щёлкнуть первый чекбокс ---
-            await first.CheckAsync();
-
-            // Проверка после действия
-            await Assertions.Expect(first).ToBeCheckedAsync();
+            await checkBoxesPage.CheckCheckboxAsync(1);
+            stateOfCheckbox1 = await checkBoxesPage.GetStateOfCheckboxAsync(1);
+            stateOfCheckbox1.Should().BeTrue();
 
             // --- ДЕЙСТВИЕ 3: вернуть второй обратно ---
-            await second.CheckAsync();
-
-            // Проверка после действия
-            await Assertions.Expect(second).ToBeCheckedAsync();
+            await checkBoxesPage.CheckCheckboxAsync(2);
+            stateOfCheckbox2 = await checkBoxesPage.GetStateOfCheckboxAsync(2);
+            stateOfCheckbox2.Should().BeTrue();      
         }
 
         [Test]
         public async Task AddRemoveElements()
         {
             // Открываем страницу
-            await Page.GotoAsync("https://the-internet.herokuapp.com/add_remove_elements/");
+            AddRemovePage addRemovePage = new AddRemovePage(Page);
+            await addRemovePage.OpenAddRemovePageAsync();
 
-            // Проверка title
-            await Assertions.Expect(Page).ToHaveTitleAsync("The Internet");
+            // Проверка страницы
+            await addRemovePage.CheckPageOpenAsync();
 
-            // Проверка URL
-            await Assertions.Expect(Page).ToHaveURLAsync("https://the-internet.herokuapp.com/add_remove_elements/");
-
-            // Локатор кнопки Add Element
-            var addButton = Page.GetByRole(AriaRole.Button, new() { Name = "Add Element" });
-
-            // Проверка видимости кнопки Add Element
-            await Assertions.Expect(addButton).ToBeVisibleAsync();
-
-            // Локатор всех Delete-кнопок
-            var deleteButtons = Page.Locator("button.added-manually");
-
-            // --- ДЕЙСТВИЕ 1: добавить первую кнопку ---
-            await addButton.ClickAsync();
+            // ДЕЙСТВИЕ 1: добавить первую кнопку 
+            await addRemovePage.ClickButtonByNameAsync("Add Element");
 
             // Проверка: появилась 1 кнопка Delete
-            await Assertions.Expect(deleteButtons).ToHaveCountAsync(1);
-
-            // --- ДЕЙСТВИЕ 2: добавить вторую кнопку ---
-            await addButton.ClickAsync();
-
+            await addRemovePage.CheckNumberOfButtonAsync("Delete", 1); 
+            
+            // ДЕЙСТВИЕ 2: добавить вторую кнопку 
+            await addRemovePage.ClickButtonByNameAsync("Add Element"); 
+            
             // Проверка: теперь их 2
-            await Assertions.Expect(deleteButtons).ToHaveCountAsync(2);
+            await addRemovePage.CheckNumberOfButtonAsync("Delete", 2); 
 
-            // --- ДЕЙСТВИЕ 3: удалить одну кнопку ---
-            await deleteButtons.Nth(0).ClickAsync();
-
+            //  ДЕЙСТВИЕ 3: удалить одну кнопку 
+            await addRemovePage.ClickButtonByNameAndNumberAsync("Delete", 2); 
+            
             // Проверка: осталась 1 кнопка
-            await Assertions.Expect(deleteButtons).ToHaveCountAsync(1);
+            await addRemovePage.CheckNumberOfButtonAsync("Delete", 1);
         }
 
         [Test]
