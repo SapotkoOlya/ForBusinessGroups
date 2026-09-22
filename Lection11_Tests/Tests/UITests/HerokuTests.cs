@@ -170,5 +170,166 @@ namespace Lection11_Tests.Tests.UITests
             await Page.GoBackAsync();
             await Assertions.Expect(Page).ToHaveURLAsync("https://the-internet.herokuapp.com/status_codes");
         }
+
+        [Test]
+        public async Task LeftBottomFrameTest()
+        {
+            FramesPage framesPage = new FramesPage(Page);
+            await framesPage.OpenFramesPageAsync();
+            await framesPage.ClickNestedFramesLinkAsync();
+            NestedFramesPage nestedFramesPage = new NestedFramesPage(Page);
+            var textFromLeftFrame = await nestedFramesPage.GetTextFromLeftFrameAsync();
+            textFromLeftFrame.Should().Contain("LEFT");
+            var textFromBottomFrame = await nestedFramesPage.GetTextFromBottomFrameAsync();
+            textFromBottomFrame.Should().Contain("BOTTOM");
+        }
+
+        [Test]
+        public async Task MultipleWindowTest()
+        {
+            MultipleWindowPage multipleWindowPage = new MultipleWindowPage(Page);
+            await multipleWindowPage.OpenMultipleWindowPageAsync();
+            var newWindow = await multipleWindowPage.OpenNewWindowAsync();
+            await Assertions.Expect(newWindow.Locator("h3")).ToHaveTextAsync("New Window");
+            newWindow.Url.Should().Contain("windows/new");
+        }
+
+        [Test]
+        public async Task JsAlertTest()
+        {
+            JavaScriptAlertsPage javaScriptAlertsPage = new JavaScriptAlertsPage(Page);
+            await javaScriptAlertsPage.OpenAlertsPageAsync();
+
+            IDialog actualDialog = null;
+            //подписываемся на событие появления алерта
+            //Page.Dialog - это событие
+            //когда алерт появится - выполни этот код
+            Page.Dialog += async (_, dialog) =>
+            {
+                actualDialog = dialog;              
+                await actualDialog.AcceptAsync();
+            };
+
+            await javaScriptAlertsPage.ClickJsAlertButtonAsync();
+
+            actualDialog.Should().NotBeNull();
+            actualDialog.Type.Should().Be("alert");
+            actualDialog.Message.Should().Be("I am a JS Alert");
+
+            var resultText = await javaScriptAlertsPage.GetResultTextAsync();
+            resultText.Should().Be("You successfully clicked an alert");
+        }
+
+        [Test]
+        public async Task JsPrompttTest()
+        {
+            JavaScriptAlertsPage javaScriptAlertsPage = new JavaScriptAlertsPage(Page);
+            await javaScriptAlertsPage.OpenAlertsPageAsync();
+
+            var textForAlert = "The best prompt!";
+
+            IDialog actualDialog = null;
+            //подписываемся на событие появления алерта
+            //Page.Dialog - это событие
+            //когда алерт появится - выполни этот код
+            Page.Dialog += async (_, dialog) =>
+            {
+                actualDialog = dialog;
+                await actualDialog.AcceptAsync(textForAlert);
+            };
+
+            await javaScriptAlertsPage.ClickJsPromptButtonAsync();
+
+            actualDialog.Should().NotBeNull();
+            actualDialog.Type.Should().Be("prompt");
+            actualDialog.Message.Should().Be("I am a JS prompt");
+            var resultText = await javaScriptAlertsPage.GetResultTextAsync();
+            resultText.Should().Be("You entered: The best prompt!");
+        }
+
+        [Test]
+        public async Task JsConfirmAccept()
+        {
+            JavaScriptAlertsPage javaScriptAlertsPage = new JavaScriptAlertsPage(Page);
+            await javaScriptAlertsPage.OpenAlertsPageAsync();
+
+            IDialog? actualDialog = null;
+            Page.Dialog += async (_, dialog) =>
+            {
+                actualDialog = dialog;
+                await actualDialog.AcceptAsync();
+            };
+
+            await javaScriptAlertsPage.ClickJsConfirmButtonAsync();
+            actualDialog.Should().NotBeNull();
+            actualDialog!.Type.Should().Be("confirm");
+            actualDialog.Message.Should().Be("I am a JS Confirm");
+            var result = await javaScriptAlertsPage.GetResultTextAsync();
+            result.Should().Be("You clicked: Ok");
+        }
+
+        [Test]
+        public async Task JsConfirmDismiss()
+        {
+            JavaScriptAlertsPage javaScriptAlertsPage = new JavaScriptAlertsPage(Page);
+            await javaScriptAlertsPage.OpenAlertsPageAsync();
+
+            IDialog? actualDialog = null;
+            Page.Dialog += async (_, dialog) =>
+            {
+                actualDialog = dialog;
+                await actualDialog.DismissAsync();
+            };
+
+            await javaScriptAlertsPage.ClickJsConfirmButtonAsync();
+            actualDialog.Should().NotBeNull();
+            actualDialog!.Type.Should().Be("confirm");
+            actualDialog.Message.Should().Be("I am a JS Confirm");
+            var result = await javaScriptAlertsPage.GetResultTextAsync();
+            result.Should().Be("You clicked: Cancel");
+        }
+
+        [Test]
+        public async Task JsPromptWithEmptyValue()
+        {
+            JavaScriptAlertsPage javaScriptAlertsPage = new JavaScriptAlertsPage(Page);
+            await javaScriptAlertsPage.OpenAlertsPageAsync();
+
+            IDialog? actualDialog = null;
+            Page.Dialog += async (_, dialog) =>
+            {
+                actualDialog = dialog;
+                await actualDialog.AcceptAsync(string.Empty);
+            };
+
+            await javaScriptAlertsPage.ClickJsPromptButtonAsync();
+
+            actualDialog.Should().NotBeNull();
+            actualDialog!.Type.Should().Be("prompt");
+            actualDialog.Message.Should().Be("I am a JS prompt");
+            var result = await javaScriptAlertsPage.GetResultTextAsync();
+            result.Should().Be("You entered:");
+        }
+
+        [Test]
+        public async Task JsPromptDismiss()
+        {
+            JavaScriptAlertsPage javaScriptAlertsPage = new JavaScriptAlertsPage(Page);
+            await javaScriptAlertsPage.OpenAlertsPageAsync();
+
+            IDialog? actualDialog = null;
+            Page.Dialog += async (_, dialog) =>
+            {
+                actualDialog = dialog;
+                await actualDialog.DismissAsync();
+            };
+
+            await javaScriptAlertsPage.ClickJsPromptButtonAsync();
+            actualDialog.Should().NotBeNull();
+            actualDialog!.Type.Should().Be("prompt");
+            actualDialog.Message.Should().Be("I am a JS prompt");
+            var result = await javaScriptAlertsPage.GetResultTextAsync();
+            result.Should().Be("You entered: null");
+        }
     }
 }

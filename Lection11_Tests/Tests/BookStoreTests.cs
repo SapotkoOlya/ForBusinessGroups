@@ -114,7 +114,7 @@ namespace Lection11_Tests.Tests
             books.Books.Should().HaveCountGreaterThan(0);
         }
 
-        //[Test]
+        [Test]
         public async Task GetBookByIsbn_ShouldReturnBook()
         {
             var book = await api.GetBookAsync("9781449325862");
