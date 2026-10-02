@@ -84,6 +84,7 @@ namespace Lection11_Tests.Tests
         }
 
         [Test]
+        [Category("QA")]
         public async Task DeleteBook_ShouldReturnSuccessMessage()
         {
             // 1. Получаем токен
