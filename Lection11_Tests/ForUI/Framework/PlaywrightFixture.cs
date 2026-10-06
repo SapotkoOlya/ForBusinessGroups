@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Playwright;
 using Lection11_Tests.ForUI.Framework;
+using Lection11_Tests.Factories;
+using Lection11_Tests;
 
 namespace Lection11_Tests.ForUI.Framework
 {
@@ -13,7 +15,7 @@ namespace Lection11_Tests.ForUI.Framework
         public IPlaywright Playwright { get; private set; }
         public IBrowser Browser { get; private set; }
 
-        public async Task InitializeAsync()
+        /*public async Task InitializeAsync()
         {
             Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
             Browser = await Playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
@@ -22,6 +24,13 @@ namespace Lection11_Tests.ForUI.Framework
                 SlowMo = 3000,
                 Args = new[] { "--start-maximized" }
             });
+        }*/
+
+        public async Task InitializeAsync(Enums.BrowserType type = Enums.BrowserType.Chromium)
+        {
+            var result = await BrowserFactory.CreateAsync(type);
+            Browser = result.Browser;
+            Playwright = result.Playwright;
         }
 
         public async ValueTask DisposeAsync()

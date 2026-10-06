@@ -54,7 +54,7 @@ namespace Lection11_Tests.Tests
             tokenResponse.Result.Should().Contain("authorized");
         }
 
-        //[Test]
+        [Test]
         public async Task AddBook_ShouldAddBookToUser()
         {
             // 1. Получаем токен
@@ -73,7 +73,7 @@ namespace Lection11_Tests.Tests
                     UserId = "7be19e22-abe1-4d61-855c-a529cfcba4cb",
                     CollectionOfIsbns = new List<BookDTO>
                     {
-                    new BookDTO { isbn = "9781449331818" }
+                    new BookDTO { isbn = "9781449325862" }
                     }
                 },
                 token
@@ -227,6 +227,7 @@ namespace Lection11_Tests.Tests
         }
 
         [Test]
+        //надо для большого теста
         public async Task Login_ShouldReturnUserId()
         {
             var response = await api.LoginUserAsync(new LoginRequestDTO
