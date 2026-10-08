@@ -17,7 +17,7 @@ namespace Lection11_Tests.Factories
             var launchOptions = new BrowserTypeLaunchOptions
             {
                 Headless = false,
-                SlowMo = 3000,
+                SlowMo = 5000,
                 Args = new[] { "--start-maximized" }
             };
 

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Lection11_Tests.Tests.UITests;
+using Lection11_Tests.Utils;
+using Lection11_Tests.Constants;
 
 namespace Lection11_Tests.ForUI.DataPicker
 {
@@ -26,7 +28,6 @@ namespace Lection11_Tests.ForUI.DataPicker
 
             var selectedDate = await DatePickerPage.GetSelectedDateValueAsync();
 
-            Assert.That(selectedDate, Is.Not.Empty, "Дата не должна быть пустой");
             Assert.That(selectedDate, Contains.Substring("15"),
                 $"Ожидалось, что выбранная дата будет содержать '15', но получили: {selectedDate}");
         }
@@ -34,11 +35,9 @@ namespace Lection11_Tests.ForUI.DataPicker
         [Test]
         public async Task ShouldSelectDateAndTimeInDateTimePicker()
         {
-            await DatePickerPage.SelectDateAndTimeAsync("October", 2026, 6, "09:30");
-
+            await DatePickerPage.SelectDateAndTimeAsync("October", 2026, 13, "09:30");
             var selectedValue = await DatePickerPage.GetSelectedDateAndTimeValueAsync();
 
-            Assert.That(selectedValue, Is.Not.Empty, "Значение не должно быть пустым");
             Assert.That(selectedValue, Contains.Substring("October"),
                 $"Ожидалось, что месяц будет October, но получили: {selectedValue}");
             Assert.That(selectedValue, Contains.Substring("2026"),
@@ -48,37 +47,23 @@ namespace Lection11_Tests.ForUI.DataPicker
         }
 
         [Test]
-        public async Task ShouldTypeDateInDatePicker()
+        public async Task ShoudTypeDateInDatePicker()
         {
-            
-            await DatePickerPage.TypeDateAsync("10/15/2026");
-
+            var date = DateTimeUtils.GetFutureDateString(-6, DateTimeConstants.MonthDayYearSlashFormat);
+            await DatePickerPage.FillDateAsync(date);
             var selectedDate = await DatePickerPage.GetSelectedDateValueAsync();
-
-            Assert.That(selectedDate, Is.Not.Empty, "Дата не должна быть пустой");
-            Assert.That(selectedDate, Contains.Substring("15"),
-                $"Ожидалось, что день будет 15, но получили: {selectedDate}");
-            Assert.That(selectedDate, Contains.Substring("10"),
-                $"Ожидалось, что месяц будет 10, но получили: {selectedDate}");
-            Assert.That(selectedDate, Contains.Substring("2026"),
-                $"Ожидалось, что год будет 2026, но получили: {selectedDate}");
+            Assert.That(selectedDate, Is.EqualTo(date),
+                $"Ожидалось, что день будет {date}, но получили {selectedDate}");
         }
 
         [Test]
-        public async Task ShouldTypeDateAndTimeInDateTimePicker()
+        public async Task ShoudTypeDateAndTimeInDatePicker()
         {
-            
-            await DatePickerPage.TypeDateAndTimeAsync("October 6, 2026 9:30 AM");
-
-            var selectedValue = await DatePickerPage.GetSelectedDateAndTimeValueAsync();
-
-            Assert.That(selectedValue, Is.Not.Empty, "Значение не должно быть пустым");
-            Assert.That(selectedValue, Contains.Substring("October"),
-                $"Ожидалось, что месяц будет October, но получили: {selectedValue}");
-            Assert.That(selectedValue, Contains.Substring("2026"),
-                $"Ожидалось, что год будет 2026, но получили: {selectedValue}");
-            Assert.That(selectedValue, Contains.Substring("9:30"),
-                $"Ожидалось, что время будет 9:30, но получили: {selectedValue}");
+            var date = DateTimeUtils.GetFutureDateString(6, DateTimeConstants.MonthDayYearTimeFormat);
+            await DatePickerPage.FillDateAndTimeAsync(date);
+            var selectedDate = await DatePickerPage.GetSelectedDateAndTimeValueAsync();
+            Assert.That(selectedDate, Is.EqualTo(date),
+                $"Ожидалось, что день будет {date}, но получили {selectedDate}");
         }
     }
 }

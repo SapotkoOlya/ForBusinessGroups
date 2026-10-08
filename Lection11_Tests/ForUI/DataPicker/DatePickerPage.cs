@@ -24,7 +24,6 @@ namespace Lection11_Tests.ForUI.DataPicker
         private ILocator YearDropdown => Page.Locator(".react-datepicker__year-read-view");
         private ILocator MonthDropdown => Page.Locator(".react-datepicker__month-read-view");
         private ILocator AllDayCells => Page.Locator(".react-datepicker__day");
-        private ILocator OutsideMonthCells => Page.Locator(".react-datepicker__day--outside-month");
         // ── Локаторы времени ──
         private ILocator AllTimeItems => Page.Locator(".react-datepicker__time-list-item");
 
@@ -53,9 +52,7 @@ namespace Lection11_Tests.ForUI.DataPicker
             await Page.GotoAsync("https://demoqa.com/date-picker");
         }
 
-        /// <summary>
         /// Открывает первый пикер и выбирает день по числу.
-        /// </summary>
         public async Task SelectDateAsync(int day)
         {
             await SelectDateInput.ClickAsync();
@@ -65,9 +62,7 @@ namespace Lection11_Tests.ForUI.DataPicker
             await DayCell(day).ClickAsync(new() { Force = true });
         }
 
-        /// <summary>
         /// Открывает второй пикер, выбирает месяц, год, день и время.
-        /// </summary>
         public async Task SelectDateAndTimeAsync(string month, int year, int day, string time)
         {
             await DateAndTimeInput.ClickAsync();
@@ -86,43 +81,33 @@ namespace Lection11_Tests.ForUI.DataPicker
             await TimeOption(time).ClickAsync(new() { Force = true });
         }
 
-        /// <summary>
         /// Возвращает значение из первого инпута.
-        /// </summary>
         public async Task<string> GetSelectedDateValueAsync()
         {
             return await SelectDateInput.InputValueAsync();
         }
 
-        /// <summary>
         /// Возвращает значение из второго инпута.
-        /// </summary>
         public async Task<string> GetSelectedDateAndTimeValueAsync()
         {
             return await DateAndTimeInput.InputValueAsync();
         }
 
-        /// <summary>
-        /// Вводит дату в первый пикер через клавиатуру.
-        /// </summary>
-        public async Task TypeDateAsync(string date)
+        public async Task FillDateAsync(string date)
         {
             await SelectDateInput.ClickAsync();
             await SelectDateInput.PressAsync("Control+a");
             await SelectDateInput.PressAsync("Delete");
-            await SelectDateInput.TypeAsync(date);
+            await SelectDateInput.FillAsync(date);
             await SelectDateInput.PressAsync("Enter");
         }
 
-        /// <summary>
-        /// Вводит дату и время во второй пикер через клавиатуру.
-        /// </summary>
-        public async Task TypeDateAndTimeAsync(string dateAndTime)
+        public async Task FillDateAndTimeAsync(string date)
         {
             await DateAndTimeInput.ClickAsync();
             await DateAndTimeInput.PressAsync("Control+a");
             await DateAndTimeInput.PressAsync("Delete");
-            await DateAndTimeInput.TypeAsync(dateAndTime);
+            await DateAndTimeInput.FillAsync(date);
             await DateAndTimeInput.PressAsync("Enter");
         }
     }

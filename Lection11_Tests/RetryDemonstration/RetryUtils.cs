@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lection11_Tests.ExplainDI.DI;
 
 namespace Lection11_Tests.RetryDemonstration
 {
@@ -81,6 +82,24 @@ namespace Lection11_Tests.RetryDemonstration
 
                 Thread.Sleep(delayMs);
             }
+        }
+
+        public static async Task<T> RetryForApi<T>(Func<Task<T>> op, TimeSpan totalMs, TimeSpan delayMs)
+        {
+            var start = DateTime.Now;
+
+            for(; (DateTime.Now - start)<totalMs ;)
+            {
+                try
+                {
+                    return await op();
+                }
+                catch
+                {
+                    await Task.Delay(delayMs);
+                }
+            }
+            throw new TimeoutException($"Operation did not succeed within {totalMs}");
         }
     }
 }
